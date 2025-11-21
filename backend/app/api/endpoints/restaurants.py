@@ -92,3 +92,27 @@ def create_table(
     db.refresh(table)
     
     return table
+
+@router.delete("/{restaurant_id}/tables/{table_id}", response_model=schemas.Table)
+def delete_table(
+    restaurant_id: int,
+    table_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(deps.get_current_active_owner),
+) -> Any:
+    """
+    Delete a table
+    """
+    restaurant = db.query(models.Restaurant).filter(models.Restaurant.id == restaurant_id).first()
+    if not restaurant:
+        raise HTTPException(status_code=404, detail="Restaurant not found")
+    if restaurant.owner_id != current_user.id:
+        raise HTTPException(status_code=400, detail="Not enough permissions")
+
+    table = db.query(models.Table).filter(models.Table.id == table_id, models.Table.restaurant_id == restaurant_id).first()
+    if not table:
+        raise HTTPException(status_code=404, detail="Table not found")
+
+    db.delete(table)
+    db.commit()
+    return table

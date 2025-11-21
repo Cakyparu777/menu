@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from app.api import deps
 from app.db.session import get_db
+from app.socket_manager import notify_new_order, notify_order_update
+from fastapi import BackgroundTasks
 
 router = APIRouter()
 
@@ -14,6 +16,7 @@ def create_order(
     db: Session = Depends(get_db),
     order_in: schemas.OrderCreate,
     current_user: models.User = Depends(deps.get_current_active_user),
+    background_tasks: BackgroundTasks = None,
 ) -> Any:
     """
     Create new order (Customer)
@@ -57,6 +60,13 @@ def create_order(
     
     db.commit()
     db.refresh(order)
+    
+    # Convert order to dict/schema for notification
+    # We can just send the ID and let the client fetch, or send the whole object.
+    # For simplicity, let's send the order ID and status.
+    if background_tasks:
+        background_tasks.add_task(notify_new_order, order.restaurant_id, {"id": order.id, "status": order.status, "total_amount": order.total_amount})
+
     return order
 
 @router.get("/my", response_model=List[schemas.Order])
@@ -94,6 +104,7 @@ def update_order_status(
     status: str,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(deps.get_current_active_owner),
+    background_tasks: BackgroundTasks = None,
 ) -> Any:
     """
     Update order status (Owner only)
@@ -110,4 +121,9 @@ def update_order_status(
     db.add(order)
     db.commit()
     db.refresh(order)
+    db.refresh(order)
+
+    if background_tasks:
+        background_tasks.add_task(notify_order_update, order.id, status)
+
     return order

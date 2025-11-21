@@ -1,6 +1,9 @@
 from typing import Any, List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
+import shutil
+import uuid
+import os
 
 from app import models, schemas
 from app.api import deps
@@ -136,4 +139,38 @@ def delete_menu_item(
 
     db.delete(item)
     db.commit()
+    return item
+
+@router.post("/items/{item_id}/image", response_model=schemas.MenuItem)
+def upload_item_image(
+    *,
+    db: Session = Depends(get_db),
+    item_id: int,
+    file: UploadFile = File(...),
+    current_user: models.User = Depends(deps.get_current_active_owner),
+) -> Any:
+    """
+    Upload image for menu item
+    """
+    item = db.query(models.MenuItem).filter(models.MenuItem.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    restaurant = db.query(models.Restaurant).filter(models.Restaurant.id == item.restaurant_id).first()
+    if restaurant.owner_id != current_user.id:
+        raise HTTPException(status_code=400, detail="Not enough permissions")
+
+    # Generate unique filename
+    file_ext = file.filename.split(".")[-1]
+    filename = f"{uuid.uuid4()}.{file_ext}"
+    file_path = f"app/static/images/{filename}"
+    
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    # Update item image_url
+    item.image_url = f"/static/images/{filename}"
+    db.add(item)
+    db.commit()
+    db.refresh(item)
     return item
