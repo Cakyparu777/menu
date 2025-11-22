@@ -24,5 +24,11 @@ class Table(Base):
     restaurant_id = Column(Integer, ForeignKey("restaurants.id"))
     table_number = Column(String)
     qr_code_url = Column(String, nullable=True)
+    x = Column(Integer, default=0)
+    y = Column(Integer, default=0)
+    width = Column(Integer, default=100)
+    height = Column(Integer, default=100)
+    shape = Column(String, default="rectangle") # rectangle, round
+    rotation = Column(Integer, default=0)
 
     restaurant = relationship("Restaurant", back_populates="tables")

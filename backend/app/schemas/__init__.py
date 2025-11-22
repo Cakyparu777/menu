@@ -1,7 +1,7 @@
 from .user import UserCreate, UserUpdate, User, SetPassword, EmployeeCreate, Token, TokenPayload, UserProfileUpdate, PasswordChange, UserStats
 from .restaurant import (
     RestaurantCreate, RestaurantUpdate, Restaurant,
-    TableCreate, Table,
+    TableCreate, TableUpdate, Table,
     CategoryCreate, Category,
     MenuItemCreate, MenuItemUpdate, MenuItem
 )

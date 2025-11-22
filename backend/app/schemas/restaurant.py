@@ -46,9 +46,24 @@ class Category(CategoryBase):
 # --- Table Schemas ---
 class TableBase(BaseModel):
     table_number: str
+    x: Optional[int] = 0
+    y: Optional[int] = 0
+    width: Optional[int] = 100
+    height: Optional[int] = 100
+    shape: Optional[str] = "rectangle"
+    rotation: Optional[int] = 0
 
 class TableCreate(TableBase):
     pass
+
+class TableUpdate(BaseModel):
+    table_number: Optional[str] = None
+    x: Optional[int] = None
+    y: Optional[int] = None
+    width: Optional[int] = None
+    height: Optional[int] = None
+    shape: Optional[str] = None
+    rotation: Optional[int] = None
 
 class Table(TableBase):
     id: int
@@ -68,8 +83,11 @@ class RestaurantBase(BaseModel):
 class RestaurantCreate(RestaurantBase):
     pass
 
-class RestaurantUpdate(RestaurantBase):
-    pass
+class RestaurantUpdate(BaseModel):
+    name: Optional[str] = None
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    enable_time_clock: Optional[bool] = None
 
 class Restaurant(RestaurantBase):
     id: int
