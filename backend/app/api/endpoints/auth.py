@@ -18,7 +18,16 @@ def login_access_token(
     OAuth2 compatible token login, get an access token for future requests
     """
     user = db.query(models.User).filter(models.User.email == form_data.username).first()
-    if not user or not security.verify_password(form_data.password, user.password_hash):
+    
+    # Check for force_password_change bypass (for new employees)
+    is_password_valid = False
+    if user:
+        if user.force_password_change:
+            is_password_valid = True
+        else:
+            is_password_valid = security.verify_password(form_data.password, user.password_hash)
+
+    if not user or not is_password_valid:
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")

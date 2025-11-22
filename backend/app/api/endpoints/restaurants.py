@@ -57,6 +57,31 @@ def read_restaurant(
         raise HTTPException(status_code=404, detail="Restaurant not found")
     return restaurant
 
+@router.put("/{restaurant_id}", response_model=schemas.Restaurant)
+def update_restaurant(
+    restaurant_id: int,
+    restaurant_in: schemas.RestaurantUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(deps.get_current_active_owner),
+) -> Any:
+    """
+    Update restaurant (Owner only)
+    """
+    restaurant = db.query(models.Restaurant).filter(models.Restaurant.id == restaurant_id).first()
+    if not restaurant:
+        raise HTTPException(status_code=404, detail="Restaurant not found")
+    if restaurant.owner_id != current_user.id:
+        raise HTTPException(status_code=400, detail="Not enough permissions")
+
+    update_data = restaurant_in.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(restaurant, field, value)
+
+    db.add(restaurant)
+    db.commit()
+    db.refresh(restaurant)
+    return restaurant
+
 @router.post("/{restaurant_id}/tables", response_model=schemas.Table)
 def create_table(
     restaurant_id: int,

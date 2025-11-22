@@ -14,6 +14,16 @@ fastapi_app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
+from fastapi.middleware.cors import CORSMiddleware
+
+fastapi_app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @fastapi_app.get("/")
 def root():
     return {"message": "Welcome to Restaurant Menu API"}

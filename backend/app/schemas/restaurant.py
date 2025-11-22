@@ -9,6 +9,7 @@ class MenuItemBase(BaseModel):
     price: Decimal
     image_url: Optional[str] = None
     is_active: bool = True
+    is_available: bool = True
 
 class MenuItemCreate(MenuItemBase):
     category_id: int
@@ -17,6 +18,7 @@ class MenuItemUpdate(MenuItemBase):
     category_id: Optional[int] = None
     name: Optional[str] = None
     price: Optional[Decimal] = None
+    is_available: Optional[bool] = None
 
 class MenuItem(MenuItemBase):
     id: int
@@ -61,6 +63,7 @@ class RestaurantBase(BaseModel):
     name: str
     address: Optional[str] = None
     phone: Optional[str] = None
+    enable_time_clock: bool = True
 
 class RestaurantCreate(RestaurantBase):
     pass

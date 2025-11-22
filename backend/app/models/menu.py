@@ -23,5 +23,6 @@ class MenuItem(Base):
     price = Column(Numeric(10, 2))
     image_url = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
+    is_available = Column(Boolean, default=True)
 
     category = relationship("Category", back_populates="items")

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from app.db.base import Base
 
@@ -10,8 +10,9 @@ class Restaurant(Base):
     name = Column(String, index=True)
     address = Column(String)
     phone = Column(String)
+    enable_time_clock = Column(Boolean, default=True)
     
-    owner = relationship("User")
+    owner = relationship("User", foreign_keys=[owner_id])
     tables = relationship("Table", back_populates="restaurant")
     categories = relationship("Category", back_populates="restaurant")
     orders = relationship("Order", back_populates="restaurant")
