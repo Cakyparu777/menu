@@ -65,7 +65,7 @@ def create_order(
     # Notify restaurant owner about new order
     restaurant = db.query(models.Restaurant).filter(models.Restaurant.id == order.restaurant_id).first()
     if restaurant:
-        notification_service.notify_user(
+        notify_user(
             db=db,
             user_id=restaurant.owner_id,
             title="🍽️ New Order Received!",
@@ -147,7 +147,7 @@ def update_order_status(
         elif status == 'completed':
             body = "Order completed. Thank you for dining with us!"
             
-        notification_service.notify_user(
+        notify_user(
             user_id=order.user_id,
             title=title,
             body=body,
